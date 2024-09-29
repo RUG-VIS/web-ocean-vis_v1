@@ -16,16 +16,18 @@ var jpeg2000decoder = function (imageBytes) {
     return jpeg2000.tiles[0].items;
 };
 
-const { grib2links, fetchGribLinksFor2022 } = require('./grib2links.js');
+const { grib2links} = require('./grib2links.js');
 
 // Declare groupedFiles at a higher scope
 var groupedFiles = {};
 
-async function getLiveMocks() {
-    // Fetch pre-generated Dropbox links using the existing grib2links.js functionality
-    var dropboxLinks = await grib2links(2022); // Assuming grib2links returns an array of Dropbox link objects
+function getLiveMocks() {
+    // Call grib2links, expecting it to return synchronously
+    var dropboxLinks = grib2links(2022); // No need for await as grib2links is now synchronous
 
+    console.log("hello");
     console.log("Fetched Dropbox Links:", dropboxLinks);
+    console.log("hello again");
 
     // Ensure dropboxLinks is an array before processing
     if (!Array.isArray(dropboxLinks)) {
@@ -38,7 +40,7 @@ async function getLiveMocks() {
         var match = link.filename.match(/hi(\d{4})(\d{2})(\d{2})_(uo|vo)\.grib2/);
         if (match) {
             var date = `${match[1]}-${match[2]}-${match[3]}`; // Fixed string interpolation
-            
+
             // Initialize the groupedFiles for the date if not already present
             if (!groupedFiles[date]) {
                 groupedFiles[date] = {
@@ -46,7 +48,7 @@ async function getLiveMocks() {
                     vo: null
                 };
             }
-            
+
             // Assign the generated Dropbox link to the appropriate variable (uo or vo)
             if (match[4] === "uo") {
                 groupedFiles[date].uo = link.generatedDropboxLink; // Use generatedDropboxLink
@@ -56,8 +58,12 @@ async function getLiveMocks() {
         }
     });
 
+    console.log("table:");
+    console.table(groupedFiles); // Pretty print
+
     return groupedFiles; // Return the grouped files by date and variable
 }
+
 
 // Export the function for use in other modules
 module.exports = { getLiveMocks };
@@ -148,7 +154,6 @@ var variableSelector = document.getElementById("variable-selector");
 
 
 var createDropDown = function () {
-    console.log('mocks first element:',mocks[0]);
     for (var day in mocks) {
         var opt = document.createElement("option");
         opt.value = day; // Set the date as the option value
@@ -190,7 +195,17 @@ function updatePlot() {
     echo("Loading data for day: '" + selectedDay + "' and variable: '" + selectedVariable + "'");
     enableLoading();
 
-    var file = mocks[selectedDay] && mocks[selectedDay][selectedVariable]; // Get the selected file
+    //var file = mocks[selectedDay] && mocks[selectedDay][selectedVariable]; // Get the selected file
+
+
+    if (mocks[selectedDay]) {
+        var file = mocks[selectedDay][selectedVariable];
+    } else{
+        window.alert("selected date and variable is not available.");
+        disableLoading();
+        return;
+    }
+
 
     if (!file) {
         window.alert("File for the selected date and variable is not available.");
