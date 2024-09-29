@@ -2,7 +2,7 @@ const { Dropbox } = require('dropbox');
 const fetch = require('isomorphic-fetch'); // Ensure fetch is available
 
 const dbx = new Dropbox({
-    accessToken: 'sl.B9pQnz_cibDhQH3ahBe4xUnzO8ahFt3GutMHjnERYNuF-o7RHIUTO7gHWPIEHLUsqb6YAcMRIwsDdX7q9wmuxLDXc8_PHNhaC4oHITCR3apWBtTa_WSKzS5BXD-xqcXA9tEVlNne_dm3p3zScZq_XRo', // Use your real token here
+    accessToken: 'sl.B90H6I7bpJPXp5cLWQ77xRQJGOxnEPohofBvldGkw0HINP18qYd3j92ehrYckjwgfJ8G8Y6xmiB9r3FXfWMVXgScn-L6s05slYYySC5ulzswt9iSh1wVTorsw_fQ5FnQ1I4gyr0vieUsvxJ5iGBqWr4', // Use your real token here
     fetch: fetch,
 });
 
@@ -29,7 +29,9 @@ async function getDropboxLink(filePath) {
         return null;
     }
 }
-async function grib2links(year) {
+
+// Function to generate links for GRIB files
+function grib2links(year) {
     const results = []; // Array to hold the result objects
 
     // Loop through each month and day of the year
@@ -41,16 +43,17 @@ async function grib2links(year) {
             // Log generated file paths for debugging
             console.log(`Checking file paths for ${year}-${month}-${day}:`, filePaths);
 
-            const dropboxLinks = await Promise.all(filePaths.map(getDropboxLink));
-            
+            // Loop through each file path synchronously
+            const dropboxLinks = filePaths.map(filePath => getDropboxLink(filePath)); // Get links directly
+
             // Log the links obtained for this date
             console.log(`Links obtained for ${year}-${month}-${day}:`, dropboxLinks);
 
             // Combine links and filenames into objects and push them into results
             dropboxLinks.forEach((linkResult, index) => {
-                if (linkResult && linkResult.link) { // Only add valid links
+                if (linkResult) { // Only add valid links
                     results.push({
-                        generatedDropboxLink: linkResult.link, // Dropbox link
+                        generatedDropboxLink: linkResult, // Dropbox link
                         filename: filePaths[index] // Corresponding filename
                     });
                 } else {
@@ -69,12 +72,4 @@ async function grib2links(year) {
 // Export the grib2links function for use in other files
 module.exports = { grib2links };
 
-
-
-// Example usage
-grib2links(2022).then((results) => {
-    console.log('Fetched links for the year 2022:', JSON.stringify(results, null, 2)); // Pretty print the result
-}).catch(err => {
-    console.error('Error fetching links:', err);
-});
 
