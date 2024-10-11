@@ -1,12 +1,4 @@
-# METEOHACK
 
-Team [meteo.io](https://www.hackworks.com/fr/meteohack/teams/meteoio)'s `opengrib2` project for the 2019 [METEOHACK](https://www.hackworks.com/fr/meteohack) hackathon.
-
-![opengrib2 preview](preview.gif)
-
-Video preview: https://www.youtube.com/watch?v=K1vVnTqb87Q
-
-## What is this thing?
 
 Most of the work here is under `./grib2class.js` which is a grib2 reader written
 in pure JavaScript (i.e. that runs in the browser!)
