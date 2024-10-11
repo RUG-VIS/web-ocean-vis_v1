@@ -19,8 +19,7 @@ run npm start
 How to push the "local" demo to GitHub pages
 run npm run build:bundle-local-data
 git add build/bundle.js
-commit and push to origin/master, or make a PR ;)
-view it at: https://archmoj.github.io/opengrib2/
+commit and push to origin/master
 How to run the "all client-side" demo
 run npm i
 run npm run build:bundle-dropbox-data
