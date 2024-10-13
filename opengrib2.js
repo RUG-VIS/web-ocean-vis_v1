@@ -2,8 +2,6 @@
 
 const https = require("https");
 const http = require("http");
-const path = require("path");
-const xml2js = require("xml2js");
 var Plotly = require("plotly.js-dist");
 
 var kml2links = require("./kml2links");
