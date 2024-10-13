@@ -2,22 +2,23 @@ const { Dropbox } = require('dropbox');
 const fetch = require('isomorphic-fetch'); // Ensure fetch is available
 
 const dbx = new Dropbox({
-    accessToken: 'sl.B91LUsLLfGqMsKAvSJE115zwMAnVsdXzUpHut-T8AdsFouYHQX6R9bhVOKUR5RlAPjuFYGeXQIPgtCj0Id9np8zPCZw2_K4ZhzdliDclssDI2_NYsgXatp04b8Whi0tvR68Cf3MW2l1pnv3OfndCXxY', // Use your real token here
+    accessToken: 'sl.B-tJxZK-gfSqGzEAKEvRz3-m_pxlm9mCki-USpD9ELcSl61_1HeUm9haHswHddqBHwD2jxwVK7KSJwz1QLDkoxwkPGTIbicKf1SSIe5TYAnGiprl-onOnj65eD5tDM6T5sg6rjlqlZzvUSgTYR5PH0c', // Use your real token here
     fetch: fetch,
 });
 
-// Function to generate file paths for a single date
+// Generate filenames for u-velocity and v-velocity
 function generateFilePaths(year, month, day) {
-    const YYYY = String("0000" + year).slice(-4);
-    const MM = String("00" + month).slice(-2);
-    const DD = String("00" + day).slice(-2);
-    
-    // Generate filenames for u-velocity and v-velocity
+    // Ensure month and day are two digits
+    const YYYY = year;
+    const MM = String(month).padStart(2, '0'); // Ensure month is two digits
+    const DD = String(day).padStart(2, '0'); // Ensure day is two digits
+
     return [
-        `/gribnewdata/metoffice_foam1_amm7_NWS_SSC_hi${YYYY}${MM}${DD}_uo.grib2`,
-        `/gribnewdata/metoffice_foam1_amm7_NWS_SSC_hi${YYYY}${MM}${DD}_vo.grib2`
+        `/MediterraneanGrib/${YYYY}${MM}${DD}_h-CMCC--RFVL-MFSe3r1-MED-b20220901_re-sv01.00_uo.grib2`,
+        `/MediterraneanGrib/${YYYY}${MM}${DD}_h-CMCC--RFVL-MFSe3r1-MED-b20220901_re-sv01.00_vo.grib2`
     ];
 }
+
 
 // Function to get a Dropbox link for a given file path
 async function getDropboxLink(filePath) {
