@@ -39,10 +39,14 @@ var age_selector = document.getElementById("age-selector");
 
 
 // Fetch KML files from Dropbox and extract the age from the filename
-function getDropboxKmlFiles(callback) {
+function getDropboxKmlFiles(token, callback) {
     console.log("Fetching KML files from Dropbox...");
+    console.log("TOKTOKEN:",token);
     
-    kml2links((err, dropboxLinks) => {
+    kml2links(token, (err, dropboxLinks) => {
+
+        console.log("check2 token:",token);
+
         if (err) {
             console.error("Error fetching Dropbox KML links:", err);
             return; // Exit the function if there's an error
@@ -85,10 +89,11 @@ function getLocalKmlFiles() {
 }
 
 // Determine which data mode to use (local or Dropbox)
-function loadKmlFilePaths(callback) {
+function loadKmlFilePaths(token, callback) {
+    console.log("loadkmldeyiz");
     switch (process.env.NODE_ENV) {
         case "dropbox-data":
-            getDropboxKmlFiles(callback); // Call the modified function
+            getDropboxKmlFiles(token,callback); // Call the modified function
             break;
         case "local-data":
             getLocalKmlFiles(); // Assume this function does not change
@@ -98,7 +103,6 @@ function loadKmlFilePaths(callback) {
             console.error("BAD BUNDLE");
             break;
     }
-    //callback();
 }
 
 // Function to load KML from either Dropbox or local storage
@@ -238,9 +242,9 @@ function visualizeScatterPlot(coordinates) {
 //---------------------------------------------------
 
 
-function getLiveMocksGrib() {
+function getLiveMocksGrib(token) {
     // Call grib2links, expecting it to return synchronously
-    var dropboxLinks = grib2links(2021); // No need for await as grib2links is now synchronous
+    var dropboxLinks = grib2links(2021,token); // No need for await as grib2links is now synchronous
 
     console.log("hello");
     console.log("Fetched Dropbox Links:", dropboxLinks);
@@ -357,20 +361,7 @@ module.exports = { createDropDown };
 
 
 
-var loading = document.getElementById("loading");
 
-var enableLoading = function () {
-    loading.style.display = "block";
-};
-
-var disableLoading = function () {
-    loading.style.display = "none";
-};
-
-var beforeAfter = {
-    before: enableLoading,
-    after: disableLoading
-};
 
 // Unified function to load and plot data based on selected day and variable
 function updatePlot(callback) {
@@ -382,13 +373,11 @@ function updatePlot(callback) {
         var file = mocks[selectedDay][selectedVariable];
     } else {
         window.alert("Selected date and variable are not available.");
-        disableLoading();
         return;
     }
 
     if (!file) {
         window.alert("File for the selected date and variable is not available.");
-        disableLoading();
         return;
     }
 
@@ -410,7 +399,6 @@ function updatePlot(callback) {
                 console.log("HTTP response status code:", res.statusCode);
 
                 if (res.statusCode !== 200) {
-                    disableLoading();
                     console.error("Failed to load file, status code:", res.statusCode);
                     return;
                 }
@@ -445,31 +433,27 @@ function updatePlot(callback) {
                     console.log("plotDiv heat:",plotDiv);
 
                     if (isInteractive) {
-                        interactivePlot(myGrid, plotDiv, beforeAfter);
+                        interactivePlot(myGrid, plotDiv);
                     } else {
-                        basicPlot(myGrid, document.getElementById("basicPlot"), beforeAfter);
+                        basicPlot(myGrid, document.getElementById("basicPlot"));
                     }
 
-                    disableLoading(); // Hide the loading spinner when done
                     if (typeof callback === 'function') {
                         callback();
                     }
                 });
 
             }).on("error", function (err) {
-                disableLoading();
                 window.alert("Error loading data: " + err.message);
             });
 
         }).catch(err => {
-            disableLoading();
             console.error("Error resolving file URL:", err);
         });
 
     } else {
         http.get(file, function (res, err) {
             if (err) {
-                disableLoading();
             }
             var allChunks = [];
             res.on("data", function (chunk) {
@@ -480,16 +464,14 @@ function updatePlot(callback) {
                
     
                 if (isInteractive) {
-                    interactivePlot(myGrid, plotDiv, beforeAfter);
+                    interactivePlot(myGrid, plotDiv);
                 } else {
-                    basicPlot(myGrid, document.getElementById("basicPlot"),beforeAfter);
+                    basicPlot(myGrid, document.getElementById("basicPlot"));
                 }
 
-                disableLoading(); // Hide the loading spinner when done
                 callback();
             });
         }).on("error", function (err) {
-            disableLoading();
             window.alert(err);
         }); 
     }
@@ -502,6 +484,8 @@ var currentIndex = 0;
 let updateIntervalId; // Variable to store the interval ID
 
 function continuousUpdate() {
+    console.log("continuous selected days:",selectedDays);
+    console.log("continuous selected.length:",selectedDays.length);
     currentIndex = (currentIndex + 1) % selectedDays.length; // Cycle through days
     var newDay = selectedDays[currentIndex]; // Get the new day
     console.log("Updating to new day:", newDay);  // Log the day being updated
@@ -517,35 +501,42 @@ function continuousUpdate() {
 }
 
 // Calls ------
-
 var mocks;
+var selectedDays;
 
-switch (process.env.NODE_ENV) {
-    case "dropbox-data":
-        mocks = getLiveMocksGrib();
-        break;
-    case "local-data":
-        mocks = getLocalMocksGrib();
-        break;
-    default:
-        console.error("BAD BUNDLE");
-        break;
-}
-
-var selectedDays = Object.keys(mocks);
-
-//window.createDropDown = createDropDown;
-createDropDown();
+document.getElementById('submitToken').addEventListener('click', function (e) {   
+    const token = document.getElementById('dropboxToken').value;
+    console.log("ACCESS TOKEN:", token); // For debugging
 
 
-//window.updatePlot = updatePlot;
-//updatePlot(); // Automatically select the first available day and variable
+    switch (process.env.NODE_ENV) {
+        case "dropbox-data":
+            mocks = getLiveMocksGrib(token);
+            break;
+        case "local-data":
+            mocks = getLocalMocksGrib();
+            break;
+        default:
+            console.error("BAD BUNDLE");
+            break;
+    }
 
-// Load KML file paths first, then start continuous updates
-window.onload = function () {
-    console.log("1--");
-    loadKmlFilePaths(function () {
-        continuousUpdate(); // Start continuous updates only after KML paths are loaded
+    console.log("check mocks:",mocks);
+
+    console.log("object.keys(mocks)",Object.keys(mocks));
+
+    selectedDays = Object.keys(mocks);
+    console.log("check selected days:",selectedDays);
+
+    createDropDown();
+
+    loadKmlFilePaths(token, function () {
+        continuousUpdate();
         console.log("2--");
     });
-};
+   
+});
+
+
+
+
