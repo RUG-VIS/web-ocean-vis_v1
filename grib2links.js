@@ -1,10 +1,7 @@
 const { Dropbox } = require('dropbox');
 const fetch = require('isomorphic-fetch'); // Ensure fetch is available
 
-const dbx = new Dropbox({
-    accessToken: 'sl.B_Zn9d12bcPRsZUB8pBMPf15mG7FTEvp19fgNrdQCBKT5t5U2FB7ber5_cY5TeLzP-C-swG64-CPRW6ClFOnoRypzeQXwvqhVHOsx94x7JQj78musyRBilleKzHWB-Sy35icrl5WEilkKaYkE-hvdHI', // Use your real token here
-    fetch: fetch,
-});
+
 
 // Generate filenames for u-velocity and v-velocity
 function generateFilePaths(year, month, day) {
@@ -21,7 +18,12 @@ function generateFilePaths(year, month, day) {
 
 
 // Function to get a Dropbox link for a given file path
-async function getDropboxLink(filePath) {
+async function getDropboxLink(filePath, token) {
+    console.log("grib getdropbox token:",token);
+    const dbx = new Dropbox({
+        accessToken: token, // Use your real token here
+        fetch: fetch,
+    });
     try {
         const response = await dbx.filesGetTemporaryLink({ path: filePath });
         return response.result.link; // Return the actual Dropbox link
@@ -32,7 +34,7 @@ async function getDropboxLink(filePath) {
 }
 
 // Function to generate links for GRIB files
-function grib2links(year) {
+function grib2links(year,token) {
     const results = []; // Array to hold the result objects
 
     // Loop through each month and day of the year
@@ -45,7 +47,7 @@ function grib2links(year) {
             console.log(`Checking file paths for ${year}-${month}-${day}:`, filePaths);
 
             // Loop through each file path synchronously
-            const dropboxLinks = filePaths.map(filePath => getDropboxLink(filePath)); // Get links directly
+            const dropboxLinks = filePaths.map(filePath => getDropboxLink(filePath,token)); // Get links directly
 
             // Log the links obtained for this date
             console.log(`Links obtained for ${year}-${month}-${day}:`, dropboxLinks);
