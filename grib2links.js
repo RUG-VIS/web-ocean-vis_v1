@@ -2,7 +2,7 @@ const { Dropbox } = require('dropbox');
 const fetch = require('isomorphic-fetch'); // Ensure fetch is available
 
 const dbx = new Dropbox({
-    accessToken: 'sl.B_aJ5JbWLEx-UpTRwmwU014wEuSRHKyLc43KtbEpp8VJ13i9WtiRVMVWQFjlkW2AGMbPJI4IvS2jheqlqqLnCJjdVC68lmJfWW6wWP_GX9nAaILfHD0tmUAoXYjMuG7-DIHdBbqsFAaMFJxERorWvGg', // Use your real token here
+    accessToken: 'sl.B_Zn9d12bcPRsZUB8pBMPf15mG7FTEvp19fgNrdQCBKT5t5U2FB7ber5_cY5TeLzP-C-swG64-CPRW6ClFOnoRypzeQXwvqhVHOsx94x7JQj78musyRBilleKzHWB-Sy35icrl5WEilkKaYkE-hvdHI', // Use your real token here
     fetch: fetch,
 });
 
