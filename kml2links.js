@@ -1,10 +1,6 @@
 const { Dropbox } = require('dropbox');
 const fetch = require('isomorphic-fetch'); // Ensure fetch is available
 
-const dbx = new Dropbox({
-    accessToken: 'sl.B_Zn9d12bcPRsZUB8pBMPf15mG7FTEvp19fgNrdQCBKT5t5U2FB7ber5_cY5TeLzP-C-swG64-CPRW6ClFOnoRypzeQXwvqhVHOsx94x7JQj78musyRBilleKzHWB-Sy35icrl5WEilkKaYkE-hvdHI', // Replace with your real token
-    fetch: fetch,
-});
 
 // Generate filenames based on the specific format
 function generateKmlFilePath(age) {
@@ -12,7 +8,13 @@ function generateKmlFilePath(age) {
 }
 
 // Function to get a Dropbox link for a given file path
-async function getDropboxLink(filePath) {
+async function getDropboxLink(token, filePath) {
+    console.log("kml getdropbox token:",token);
+    const dbx = new Dropbox({
+        accessToken: token, // Replace with your real token
+        fetch: fetch,
+    });
+
     try {
         const response = await dbx.filesGetTemporaryLink({ path: filePath });
         return response.result.link; // Return the actual Dropbox link
@@ -27,7 +29,9 @@ async function getDropboxLink(filePath) {
 }
 
 // Function to generate links for KML files
-function kml2links(callback) {
+function kml2links(token, callback) {
+    console.log("check1 = token:", token);
+
     const results = []; // Array to hold the result objects
 
     // Loop through each age value from 0 to 5532
@@ -46,7 +50,7 @@ function kml2links(callback) {
         console.log(`Checking file path for age ${age}:`, filePath);
 
         // Get the Dropbox link asynchronously, then move to the next age
-        getDropboxLink(filePath).then(linkResult => {
+        getDropboxLink(token, filePath).then(linkResult => {
             // Log the link obtained for this age
             console.log(`Link obtained for age ${age}:`, linkResult);
 
@@ -75,7 +79,7 @@ function kml2links(callback) {
 }
 
 // Usage: Call the kml2links function with a callback
-kml2links((err, links) => {
+kml2links( (err, links) => {
     if (err) {
         console.error("Error fetching KML links:", err);
     } else {
